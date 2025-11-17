@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Properties - RealNest</title>
+    <style>
+        .search-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+        .filter-sidebar {
+            position: sticky;
+            top: 20px;
+        }
+        .filter-section {
+            margin-bottom: 1.5rem;
+        }
+        .search-result-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+        .search-result-card:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <!-- Search Hero Section -->
+    <section class="search-hero">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <h1 class="display-5 fw-bold mb-4">Find Your Dream Home</h1>
+                    <p class="lead mb-4">Search through thousands of properties to find the perfect match</p>
+                    
+                    <!-- Quick Search Form -->
+                    <form th:action="@{/properties/search}" method="get" class="row g-3 justify-content-center">
+                        <div class="col-md-5">
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   name="location" 
+                                   placeholder="Enter city, zip code, or neighborhood"
+                                   th:value="${param.location}">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-control form-control-lg" name="type">
+                                <option value="">All Types</option>
+                                <option value="SALE" th:selected="${param.type == 'SALE'}">For Sale</option>
+                                <option value="RENT" th:selected="${param.type == 'RENT'}">For Rent</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-light btn-lg w-100">
+                                <i class="bi bi-search"></i> Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="row">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3">
+                <div class="filter-sidebar">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Filters</h5>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/properties/search}" method="get" id="filterForm">
+                                <!-- Price Range -->
+                                <div class="filter-section">
+                                    <h6>Price Range</h6>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <input type="number" 
+                                                   class="form-control" 
+                                                   name="minPrice" 
+                                                   placeholder="Min"
+                                                   th:value="${param.minPrice}">
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" 
+                                                   class="form-control" 
+                                                   name="maxPrice" 
+                                                   placeholder="Max"
+                                                   th:value="${param.maxPrice}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Property Type -->
+                                <div class="filter-section">
+                                    <h6>Property Type</h6>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="type" id="typeAll" value="" checked>
+                                        <label class="form-check-label" for="typeAll">All Types</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="type" id="typeSale" value="SALE" th:checked="${param.type == 'SALE'}">
+                                        <label class="form-check-label" for="typeSale">For Sale</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="type" id="typeRent" value="RENT" th:checked="${param.type == 'RENT'}">
+                                        <label class="form-check-label" for="typeRent">For Rent</label>
+                                    </div>
+                                </div>
+
+                                <!-- Bedrooms -->
+                                <div class="filter-section">
+                                    <h6>Bedrooms</h6>
+                                    <select class="form-control" name="bedrooms">
+                                        <option value="">Any</option>
+                                        <option value="1">1+ Bedroom</option>
+                                        <option value="2">2+ Bedrooms</option>
+                                        <option value="3">3+ Bedrooms</option>
+                                        <option value="4">4+ Bedrooms</option>
+                                    </select>
+                                </div>
+
+                                <!-- Bathrooms -->
+                                <div class="filter-section">
+                                    <h6>Bathrooms</h6>
+                                    <select class="form-control" name="bathrooms">
+                                        <option value="">Any</option>
+                                        <option value="1">1+ Bathroom</option>
+                                        <option value="2">2+ Bathrooms</option>
+                                        <option value="3">3+ Bathrooms</option>
+                                    </select>
+                                </div>
+
+                                <!-- Features -->
+                                <div class="filter-section">
+                                    <h6>Features</h6>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="featureParking">
+                                        <label class="form-check-label" for="featureParking">Parking</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="featureGarden">
+                                        <label class="form-check-label" for="featureGarden">Garden</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="featurePool">
+                                        <label class="form-check-label" for="featurePool">Swimming Pool</label>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="location" th:value="${param.location}">
+                                
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                                    <a th:href="@{/properties/search}" class="btn btn-outline-secondary">Reset</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div class="col-lg-9">
+                <!-- Results Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4>Search Results</h4>
+                        <p class="text-muted mb-0" th:if="${properties != null}">
+                            Found <strong th:text="${properties.size()}">0</strong> properties
+                            <span th:if="${param.location}">in <strong th:text="${param.location}"></strong></span>
+                        </p>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            Sort By: Newest First
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Newest First</a></li>
+                            <li><a class="dropdown-item" href="#">Price: Low to High</a></li>
+                            <li><a class="dropdown-item" href="#">Price: High to Low</a></li>
+                            <li><a class="dropdown-item" href="#">Most Popular</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Results Grid -->
+                <div th:if="${properties != null && !properties.empty}">
+                    <div class="row">
+                        <div th:each="property : ${properties}" class="col-12 mb-4">
+                            <div class="card search-result-card">
+                                <div class="row g-0">
+                                    <div class="col-md-4">
+                                        <img th:src="${property.imageUrl ?: '/images/property-placeholder.jpg'}" 
+                                             class="img-fluid h-100" 
+                                             alt="Property Image"
+                                             style="object-fit: cover; min-height: 200px;">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body h-100 d-flex flex-column">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0" th:text="${property.title}">Property Title</h5>
+                                                <span th:classappend="${property.type == 'SALE' ? 'bg-success' : 'bg-primary'}" 
+                                                      class="badge">
+                                                    <span th:text="${property.type}"></span>
+                                                </span>
+                                            </div>
+                                            <p class="card-text text-muted mb-2">
+                                                <i class="bi bi-geo-alt"></i>
+                                                <span th:text="${property.location}">Location</span>
+                                            </p>
+                                            <p class="card-text flex-grow-1" 
+                                               th:text="${property.description.length() > 150 ? property.description.substring(0, 150) + '...' : property.description}">
+                                                Property description
+                                            </p>
+                                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                                <div>
+                                                    <h4 class="text-primary mb-0">
+                                                        $<span th:text="${#numbers.formatDecimal(property.price, 0, 'COMMA', 0, 'POINT')}"></span>
+                                                    </h4>
+                                                    <small class="text-muted" th:text="${#temporals.format(property.dateListed, 'MMM dd, yyyy')}">
+                                                        Listed date
+                                                    </small>
+                                                </div>
+                                                <a th:href="@{/properties/view/{id}(id=${property.id})}" class="btn btn-primary">
+                                                    View Details
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Results -->
+                <div th:if="${properties == null || properties.empty}" class="text-center py-5">
+                    <div class="card">
+                        <div class="card-body py-5">
+                            <i class="fs-1 text-muted">🔍</i>
+                            <h4 class="mt-3">No Properties Found</h4>
+                            <p class="text-muted">Try adjusting your search criteria or browse all properties.</p>
+                            <a th:href="@{/properties}" class="btn btn-primary">Browse All Properties</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</body>
+</html>
